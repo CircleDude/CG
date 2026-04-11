@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Задание 1</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+
+    <canvas id="myCanvas" width="60" height="60"></canvas>
+    
+    <script src="../Библиотеки/d3.v7.min.js"></script>
+    <script src="../Библиотеки/math.js"></script>
+    <script src="../JavaScript/functions.js"></script>
+    <script src="task_1.js"></script>
+
+    <div>mouse:
+        <div id="x"></div>
+        <div id="y"></div>
+    </div>
+
+    <p>
+        Рисовать ломаную?
+        <input type="checkbox" id="drawPolyLine">
+        <input type="button" value="Очистить" id="clearPoints">
+    </p>
+    <p>
+        Включить анимацию?
+        <input type="checkbox" id="animate">
+        Скорость вращения (рад/мc):
+        <input type="number" value="0.01" id="rotSpeed">
+    </p>
+    <p>
+        Включить antialiasing?
+        <input type="checkbox" id="antialiasing">
+    </p>
+
+    <div>points (<span id="pointsCount">count</span>):
+        <div id="points" stlye="width: 32px;"></div>
+    </div>
+
+</body>
+</html>

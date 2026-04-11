@@ -1,33 +1,181 @@
-const canvas = document.getElementById("myCanvas");
+const canvas = d3.select("#myCanvas").node();
 const ctx = canvas.getContext("2d");
 
 function setColor(someColor) {
     ctx.fillStyle = someColor;
 }
 
-const POINT = {
-    x: 0,
-    y: 0
-};
 
-function putPixel(x, y) {
-    ctx.fillRect(x, y, 1, 1);
+function clear() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 
-function putGrid() {
+function drawPixel(x, y) {
+    ctx.fillRect(Math.floor(x), Math.floor(y), 1, 1);
+}
+
+function dPixel(...points) {
+    for (let p of points) {
+        drawPixel(p[0], p[1]);
+    }
+}
+
+function drawPixelColor(x, y, c) {
+    setColor(c);
+    drawPixel(x, y);
+}
+
+
+function drawGrid() {
     let someColor = ctx.fillStyle;
 
-    setColor('#eeeeee');
+    setColor('#'+'f5'.repeat(3));
     for (let y = 0; y < canvas.height; ++y) {
         for (let x = 0; x < canvas.width; ++x) {
-            if (x%2 === y%2) putPixel(x, y);
+            if (x%2 === y%2) drawPixel(x, y);
         }
     }
 
     setColor(someColor);
 }
 
+
 // task_1
 
-// function putLine(A, B)
+function drawLine(x0,y0, x1,y1) { // Алгоритм Брезенхема
+    x0 = Math.floor(x0);
+    y0 = Math.floor(y0);
+    x1 = Math.floor(x1);
+    y1 = Math.floor(y1);
+
+    let x = x0;
+    let y = y0;
+    let dx = Math.abs(x1 - x0);
+    let dy = Math.abs(y1 - y0);
+    let s1 = Math.sign(x1 - x0);
+    let s2 = Math.sign(y1 - y0);
+    let exch = false;
+    let e;
+    
+    if (dy > dx) {
+        let temp = dx;
+        dx = dy;
+        dy = temp;
+        exch = true;
+    }
+    e = 2 * dy - dx;
+    for(let i = 1; i <= dx; ++i) {
+        drawPixel(x,y);
+        while (e >= 0) {
+            if (exch) x += s1;
+            else y += s2;
+            e -= 2 * dx;
+        }
+        if (exch) y += s2
+        else x += s1;
+        e += 2 * dy;
+    }
+}
+
+function dPolyLine(...points) {
+    for (let i = 1; i < points.length; ++i) {
+        drawLine(points[i-1][0],points[i-1][1],points[i][0],points[i][1]);
+    }
+}
+
+
+function drawSmoothLine(x0,y0, x1,y1) { // Алгоритм Ву
+    const fpart = (x => x - Math.floor(x));
+    const rfpart = (x => 1 - fpart(x));
+    
+    let col = {
+        r: 100,
+        g: 20,
+        b: 20,
+        a: 1,
+
+        rgb() {
+            return `${this.r}, ${this.g}, ${this.b}`;
+        }
+    }
+
+    let steep = Math.abs(y1 - y0) > Math.abs(x1 - x0);
+    let gradient;
+
+    if (steep) {
+        let temp = x0;
+        x0 = y0;
+        y0 = temp;
+
+        temp = x1;
+        x1 = y1;
+        y1 = temp;
+    }
+    if (x0 > x1) {
+        let temp = x0;
+        x0 = x1;
+        x1 = temp;
+
+        temp = y0;
+        y0 = y1;
+        y1 = temp;
+    }
+
+    let dx = x1 - x0;
+    let dy = y1 - y0;
+
+    if (dx == 0)
+        gradient = 1;
+    else
+        gradient = dy/dx;
+
+    let xend = Math.floor(x0);
+    let yend = y0 + gradient * (xend - x0);
+    let xgap = 1 - (x0 - xend);
+    let xpxl1 = xend;
+    let ypxl1 = Math.floor(yend);
+    
+    if (steep) {
+        drawPixelColor(ypxl1, xpxl1, `rgba(${col.rgb()}, ${rfpart(yend) * xgap})`);
+        drawPixelColor(ypxl1+1, xpxl1, `rgba(${col.rgb()}, ${fpart(yend) * xgap})`);
+    } else {
+        drawPixelColor(xpxl1, ypxl1, `rgba(${col.rgb()}, ${rfpart(yend) * xgap})`);
+        drawPixelColor(xpxl1, ypxl1+1, `rgba(${col.rgb()}, ${fpart(yend) * xgap})`);
+    }
+    let intery = yend + gradient;
+
+    xend = Math.ceil(x1);
+    yend = y1 + gradient * (xend - x1);
+    xgap = 1 - (xend - x1);
+    let xpxl2 = xend;
+    let ypxl2 = Math.floor(yend);
+
+    if (steep) {
+        drawPixelColor(ypxl2, xpxl2, `rgba(${col.rgb()}, ${rfpart(yend) * xgap})`);
+        drawPixelColor(ypxl2+1, xpxl2, `rgba(${col.rgb()}, ${fpart(yend) * xgap})`);
+    } else {
+        drawPixelColor(xpxl2, ypxl2, `rgba(${col.rgb()}, ${rfpart(yend) * xgap})`);
+        drawPixelColor(xpxl2, ypxl2+1, `rgba(${col.rgb()}, ${fpart(yend) * xgap})`);
+    }
+
+    if (steep) {
+        for (let x = xpxl1 + 1; x <= xpxl2 - 1; ++x) {
+            drawPixelColor(Math.floor(intery), x, `rgba(${col.rgb()}, ${rfpart(intery)})`);
+            drawPixelColor(Math.floor(intery)+1, x, `rgba(${col.rgb()}, ${fpart(intery)})`);
+            intery += gradient;
+        }
+    } else {
+        for (let x = xpxl1 + 1; x <= xpxl2 - 1; ++x) {
+            drawPixelColor(x, Math.floor(intery), `rgba(${col.rgb()}, ${rfpart(intery)})`);
+            drawPixelColor(x, Math.floor(intery)+1, `rgba(${col.rgb()}, ${fpart(intery)})`);
+            intery += gradient;
+        }
+    }
+}
+
+function dSmoothPolyLine(...points) {
+    for (let i = 1; i < points.length; ++i) {
+        drawSmoothLine(points[i-1][0],points[i-1][1],points[i][0],points[i][1]);
+    }
+}
