@@ -1,0 +1,6 @@
+canvas {
+    width: 550px;
+    height: width;
+    image-rendering: pixelated;
+    border: 1px solid black;
+}
