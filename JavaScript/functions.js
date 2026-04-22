@@ -1,47 +1,51 @@
-const canvas = d3.select("#myCanvas").node();
-const ctx = canvas.getContext("2d");
+let canvas, ctx;
+
+document.addEventListener("DOMContentLoaded", function() {
+    canvas = d3.select("#myCanvas").node();
+    ctx = canvas.getContext("2d");
+});
+
 
 function setColor(someColor) {
     ctx.fillStyle = someColor;
 }
-
-
 function clear() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-
 function drawPixel(x, y) {
     ctx.fillRect(Math.floor(x), Math.floor(y), 1, 1);
 }
-
 function dPixel(...points) {
     for (let p of points) {
-        drawPixel(p[0], p[1]);
+        drawPixel(...p);
     }
 }
-
 function drawPixelColor(x, y, c) {
     setColor(c);
     drawPixel(x, y);
 }
 
 
-function drawGrid() {
-    let someColor = ctx.fillStyle;
+// task_1
 
-    setColor('#'+'f5'.repeat(3));
-    for (let y = 0; y < canvas.height; ++y) {
-        for (let x = 0; x < canvas.width; ++x) {
-            if (x%2 === y%2) drawPixel(x, y);
-        }
-    }
+function rotate(centerPoint, rad, ...points) {
+    let T =
+        [[Math.cos(rad), Math.sin(rad), 0],
+        [-Math.sin(rad), Math.cos(rad), 0],
+        [0, 0, 1]];
+    let N0 =
+        [[1, 0, 0],
+        [0, 1, 0],
+        [-centerPoint[0], -centerPoint[1], 1]];
+    let N1 =
+        [[1, 0, 0],
+        [0, 1, 0],
+        [centerPoint[0], centerPoint[1], 1]];
 
-    setColor(someColor);
+    return points.map(p => math.multiply([p[0], p[1], 1], N0, T, N1));
 }
 
-
-// task_1
 
 function drawLine(x0,y0, x1,y1) { // Алгоритм Брезенхема
     x0 = Math.floor(x0);
@@ -77,24 +81,22 @@ function drawLine(x0,y0, x1,y1) { // Алгоритм Брезенхема
         e += 2 * dy;
     }
 }
-
-function dPolyLine(...points) {
-    for (let i = 1; i < points.length; ++i) {
-        drawLine(points[i-1][0],points[i-1][1],points[i][0],points[i][1]);
-    }
+function dLine(A, B) {
+    drawLine(...A, ...B);
 }
 
 
 function drawSmoothLine(x0,y0, x1,y1) { // Алгоритм Ву
     const fpart = (x => x - Math.floor(x));
     const rfpart = (x => 1 - fpart(x));
-    
-    let col = {
-        r: 100,
-        g: 20,
-        b: 20,
-        a: 1,
 
+    let inputColor = ctx.fillStyle;
+    let col = {
+        r: parseInt(inputColor[1]+inputColor[2], 16),
+        g: parseInt(inputColor[3]+inputColor[4], 16),
+        b: parseInt(inputColor[5]+inputColor[6], 16),
+        a: 1,
+        
         rgb() {
             return `${this.r}, ${this.g}, ${this.b}`;
         }
@@ -172,10 +174,19 @@ function drawSmoothLine(x0,y0, x1,y1) { // Алгоритм Ву
             intery += gradient;
         }
     }
+
+    setColor(inputColor);
+}
+function dSmoothLine(A, B) {
+    drawSmoothLine(...A, ...B);
 }
 
-function dSmoothPolyLine(...points) {
+
+function dPolyLine(dLineFunc, closed, ...points) {
     for (let i = 1; i < points.length; ++i) {
-        drawSmoothLine(points[i-1][0],points[i-1][1],points[i][0],points[i][1]);
+        dLineFunc(points[i-1], points[i]);
     }
+    if (closed) dLineFunc(points.at(-1), points[0]);
 }
+
+

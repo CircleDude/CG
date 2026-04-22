@@ -2,22 +2,26 @@ let points = [];
 let M = [];
 let C = [];
 
-canvas.onmousemove = function(e) {
-    M =
-        [Math.floor(e.offsetX / 550 * canvas.width),
-        Math.floor(e.offsetY / 550 * canvas.height)];
-}
-
-canvas.onclick = function(e) {
-    if (d3.select('#drawPolyLine').node().checked) {
-        points.push(M);
-    } else {
-        C = M;
-    }
-}
-
 
 document.addEventListener("DOMContentLoaded", function() {
+    canvas.onmousemove = function(e) {
+        M =
+            [Math.floor(e.offsetX / canvas.offsetWidth * canvas.width),
+            Math.floor(e.offsetY / canvas.offsetHeight * canvas.height)];
+    }
+
+    canvas.onclick = function(e) {
+        if (d3.select('#drawPolyLine').node().checked) {
+            points.push(M);
+        } else {
+            C = M;
+        }
+    }
+
+    
+    canvas.width = 60;
+    canvas.height = canvas.width;
+
     C = [canvas.width/2, canvas.height/2];
 
     d3.select('#drawPolyLine').node().checked = true;
@@ -40,44 +44,31 @@ const loop = function(time) {
 
     d3.select('#fps').node().innerHTML = `fps: ${Math.floor(1 / dt * 1000)}`;
 
-    updateDataItaration(dt);
-    updateCanvasIteration();
+    dataUpdateItaration(dt);
+    canvasUpdateIteration();
     
     requestAnimationFrame(loop);
 }
 
-const updateDataItaration = function(dt) {
+
+const dataUpdateItaration = function(dt) {
     d3.select('#x').node().innerHTML = 'x: ' + M[0];
     d3.select('#y').node().innerHTML = 'y: ' + M[1];
 
     if (d3.select('#animate').node().checked) {
-        let rad = d3.select('#rotSpeed').node().value;
-        let T =
-            [[Math.cos(rad), Math.sin(rad), 0],
-            [-Math.sin(rad), Math.cos(rad), 0],
-            [0, 0, 1]];
-        let N0 =
-            [[1, 0, 0],
-            [0, 1, 0],
-            [-C[0], -C[1], 1]];
-        let N1 =
-            [[1, 0, 0],
-            [0, 1, 0],
-            [C[0], C[1], 1]];
-
-        points = points.map(p => math.multiply([p[0], p[1], 1], N0, T, N1));
+        points = rotate(C, d3.select('#rotSpeed').node().value, ...points);
     }
 
     d3.select('#pointsCount').node().innerHTML = points.length;
     d3.select('#points').node().innerHTML = [...points].map( p => ""+p+"<br>");
 }    
 
-const updateCanvasIteration = function() {
+const canvasUpdateIteration = function() {
     clear();
     drawGrid();
 
     let drawLineFunc = (d3.select('#antialiasing').node().checked) ?
-        dSmoothPolyLine : dPolyLine;
+        dSmoothLine : dLine;
     
     if (d3.select('#drawPolyLine').node().checked) {
         setColor('brown');
@@ -86,7 +77,7 @@ const updateCanvasIteration = function() {
 
     if (points.length >= 2) {
         setColor('brown');
-        drawLineFunc(...points);
+        dPolyLine(drawLineFunc, false, ...points);
     }
 
     setColor('blue');
@@ -94,4 +85,18 @@ const updateCanvasIteration = function() {
     
     setColor('green');
     dPixel(M);
+}
+
+
+function drawGrid() {
+    let someColor = ctx.fillStyle;
+
+    setColor('#'+'f5'.repeat(3));
+    for (let y = 0; y < canvas.height; ++y) {
+        for (let x = 0; x < canvas.width; ++x) {
+            if (x%2 === y%2) drawPixel(x, y);
+        }
+    }
+
+    setColor(someColor);
 }
