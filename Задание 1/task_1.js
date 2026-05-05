@@ -4,6 +4,11 @@ let C = [];
 
 
 document.addEventListener("DOMContentLoaded", function() {
+    setCurrentCanvas('myCanvas');
+    canvas.width = 60;
+    canvas.height = canvas.width;
+    updateCanvasImage();
+
     canvas.onmousemove = function(e) {
         M =
             [Math.floor(e.offsetX / canvas.offsetWidth * canvas.width),
@@ -18,11 +23,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    
-    canvas.width = 60;
-    canvas.height = canvas.width;
-
     C = [canvas.width/2, canvas.height/2];
+    // C = rotate([0,0], 1, C);
 
     d3.select('#drawPolyLine').node().checked = true;
 
@@ -33,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
     d3.select('body').insert('div', 'div').attr('id', 'fps').node().innerHTML = 'fps';
 
-    requestAnimationFrame(loop);
+    loop();
 })
 
 
@@ -56,7 +58,7 @@ const dataUpdateItaration = function(dt) {
     d3.select('#y').node().innerHTML = 'y: ' + M[1];
 
     if (d3.select('#animate').node().checked) {
-        points = rotate(C, d3.select('#rotSpeed').node().value, ...points);
+        points = rotate(...C, d3.select('#rotSpeed').node().value, ...points);
     }
 
     d3.select('#pointsCount').node().innerHTML = points.length;
@@ -64,39 +66,32 @@ const dataUpdateItaration = function(dt) {
 }    
 
 const canvasUpdateIteration = function() {
-    clear();
+    clearCanvas();
     drawGrid();
 
     let drawLineFunc = (d3.select('#antialiasing').node().checked) ?
-        dSmoothLine : dLine;
+        drawSmoothLine : drawLine;
     
     if (d3.select('#drawPolyLine').node().checked) {
-        setColor('brown');
-        if (points.length >= 1) drawLineFunc(points.at(-1), M);
+        if (points.length >= 1) drawLineFunc(...points.at(-1), ...M, 220,20,20,1);
     }
 
     if (points.length >= 2) {
-        setColor('brown');
-        dPolyLine(drawLineFunc, false, ...points);
+        drawPolyLine(drawLineFunc, false, 220,20,20,1, ...points);
     }
 
-    setColor('blue');
-    dPixel(C);
+    drawPixel(...C, 0,0,255);
     
-    setColor('green');
-    dPixel(M);
+    drawPixel(...M, 0,255,0);
+
+    updateCanvasContext();
 }
 
 
 function drawGrid() {
-    let someColor = ctx.fillStyle;
-
-    setColor('#'+'f5'.repeat(3));
     for (let y = 0; y < canvas.height; ++y) {
         for (let x = 0; x < canvas.width; ++x) {
-            if (x%2 === y%2) drawPixel(x, y);
+            if (x%2 === y%2) drawPixel(x, y, 0,0,0,0.04);
         }
     }
-
-    setColor(someColor);
 }

@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+  <style>
+    
+    #my-canvas { border: 1px solid gray; }
+    
+  </style>
+</head>
+<body>
+  <canvas id="my-canvas" width="200" height="200"></canvas>
+  <script>
+    
+    const canvas = document.getElementById("my-canvas");
+    const context = canvas.getContext("2d");
+
+    const img = context.createImageData(canvas.width, canvas.height);
+    const data = img.data;
+
+    // функция установки пикселя
+    // function setPixel(x, y, col) {
+    //     const i = (y * canvas.width + x) * 4;
+    //     data[i] = col.r;
+    //     data[i+1] = col.g;
+    //     data[i+2] = col.b;
+    //     data[i+3] = col.a;
+    // }
+    function setPixel(x,y, col) {
+        const i = (y * canvas.width + x) * 4;
+        if (col.a === 1) {
+            data[i]   = col.r;
+            data[i+1] = col.g;
+            data[i+2] = col.b;
+        } else {
+            // const alpha = col.a / 255;
+            data[i]     += (col.r - data[i]) * col.a;
+            data[i + 1] += (col.g - data[i+1]) * col.a;
+            data[i + 2] += (col.b - data[i+2]) * col.a;
+        }
+        data[i + 3] = 255;
+    }
+
+    function clear() {
+        for(i = 0; i < canvas.width; ++i) {
+            for(j = 0; j < canvas.height; ++j) {
+                setPixel(i,j,{r:255,g:255,b:255,a: 255});
+            }
+        }
+    }
+
+    // Usage example:
+    
+    var colors = [
+          	{r: 255, g:   0, b:   0, a: 0.95},  // red
+          	{r:   0, g: 255, b:   0, a: 0.95},  // green
+          	{r:   0, g:   0, b: 255, a: 0.95}   // blue
+        ];
+        
+    
+
+    var t1 = new Date();
+
+    for(var i = 0; i < 1_000_000; ++i) {
+      var x = Math.floor(canvas.width * Math.random());
+      var y = Math.floor(canvas.height * Math.random());
+      var color = colors[i % colors.length];
+    	setPixel(x, y, color);
+    }
+    context.putImageData(img, 0, 0);
+    context.putImageData(img, 0, 0);
+
+    var t2 = new Date();
+    var dt = t2 - t1;
+    
+    console.log('elapsed time = ' + dt + ' ms');
+
+  </script>
+</body>
+</html>
