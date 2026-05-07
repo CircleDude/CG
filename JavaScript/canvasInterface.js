@@ -26,6 +26,11 @@ function drawPixel(x,y, r,g,b,a=1) {
     data[i + 3] = 255;
 }
 
+function getCanvasMousePoint(event) {
+    return [Math.floor(event.offsetX / canvas.offsetWidth * canvas.width),
+            Math.floor(event.offsetY / canvas.offsetHeight * canvas.height)];
+}
+
 function clearCanvas() {
     data.fill(255);
 }

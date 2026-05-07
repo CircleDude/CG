@@ -2,6 +2,8 @@ let loopON = false;
 let M = [];
 let Rect = [];
 let Line = [];
+let FigureRect = [];
+let Rects = [];
 const dlineFunc = drawLine;
 // const dlineFunc = drawSmoothLine;
 let modeProc = function() {};
@@ -17,6 +19,8 @@ document.addEventListener("DOMContentLoaded", function() {
         M =
             [Math.floor(e.offsetX / canvas.offsetWidth * canvas.width),
             Math.floor(e.offsetY / canvas.offsetHeight * canvas.height)];
+
+        updateFigureRectByMouse();
     }
     
     canvas.onclick = function(e) {
@@ -32,6 +36,8 @@ document.addEventListener("DOMContentLoaded", function() {
         [canvas.width/4*3, canvas.height/4*3],
         [canvas.width/4, canvas.height/4*3]
     ];
+
+    FigureRect = createRandomFigureRect();
     
     d3.select('body').insert('div', 'div').attr('id', 'fps').node().innerHTML = 'fps';
 
@@ -118,5 +124,46 @@ const lineModeProc = function() {
 
 
 const rectModeProc = function() {
-    fillTriangle(...Rect[0], ...Rect[2], ...M);
+    const poly = makeRectPoints(
+        FigureRect.cx,
+        FigureRect.cy,
+        FigureRect.w,
+        FigureRect.h,
+        FigureRect.angle
+    );
+
+    const clipped = clipPolygonByRect(poly, Rect);
+
+    fillPolygon(clipped, 180, 60, 60, 1);
+    drawPolyLine(dlineFunc, true, 80, 0, 0, 1, ...poly);
+}
+
+
+
+
+
+
+
+
+function rand(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function createRandomFigureRect() {
+    const w = rand(canvas.width/5, canvas.width/2);
+    const h = rand(canvas.width/5, canvas.width/2);
+    const angle = rand(0, Math.PI * 2);
+
+    const cx = rand(w / 2 + 2, canvas.width - w / 2 - 2);
+    const cy = rand(h / 2 + 2, canvas.height - h / 2 - 2);
+
+    return {
+        cx, cy, w, h, angle
+    };
+}
+
+function updateFigureRectByMouse() {
+    if (!FigureRect) return;
+    FigureRect.cx = M[0];
+    FigureRect.cy = M[1];
 }
