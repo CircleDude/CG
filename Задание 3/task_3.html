@@ -2,15 +2,14 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <title>Задание #</title>
+    <title>Задание 3</title>
     <link rel="stylesheet" href="../CSS/style.css">
-    
+
     <script src="../JavaScript/libs/d3.v7.min.js"></script>
     <script src="../JavaScript/libs/math.js"></script>
     <script src="../JavaScript/canvasInterface.js"></script>
     <script src="../JavaScript/functions.js"></script>
     <script src="task_3.js"></script>
-    
 </head>
 <body>
 
@@ -22,10 +21,28 @@
     </div>
 
     <select id="mode">
-        <option value="">1</option>
-        <option value="">2</option>
-        <option value="">3</option>
+        <option value="1">Классическое "Дерево Пифагора"</option>
+        <option value="2">"Дерево Пифагора" с варьируемым углом</option>
+        <option value="3">L-система</option>
     </select>
+
+    <div id="angleWrap" style="display:none; margin-top: 8px;">
+        <label for="angleInput">Угол (градусы):</label>
+        <input id="angleInput" type="number" value="30" min="1" max="89" step="1">
+    </div>
+
+    <div id="lsysWrap" style="display:none; margin-top: 8px;">
+        <label for="lsysSelect">L-дерево:</label>
+        <select id="lsysSelect">
+            <option value="bush">Куст</option>
+            <option value="fern">Папоротник</option>
+        </select>
+    </div>
+
+    <div id="lsysIterWrap" style="display:none; margin-top: 8px;">
+        <label for="lsysIterInput">Итерации:</label>
+        <input id="lsysIterInput" type="number" value="5" min="1" max="10" step="1">
+    </div>
 
 </body>
 </html>

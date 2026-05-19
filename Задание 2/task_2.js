@@ -10,8 +10,8 @@ let modeProc = function() {};
 
 document.addEventListener("DOMContentLoaded", function() {
     setCurrentCanvas('myCanvas');
-    canvas.width = 60;
-    // canvas.width = 1000;
+    // canvas.width = 60;
+    canvas.width = 300;
     canvas.height = canvas.width / 1.5;
     updateCanvasImage();
 
@@ -141,8 +141,80 @@ const rectModeProc = function() {
 
 
 
+function makeRectPoints(cx, cy, w, h, angle) {
+    const pts = [
+        [cx - w / 2, cy - h / 2],
+        [cx + w / 2, cy - h / 2],
+        [cx + w / 2, cy + h / 2],
+        [cx - w / 2, cy + h / 2]
+    ];
 
+    return rotate(cx, cy, angle, ...pts);
+}
 
+function fillPolygon(points, r = 0, g = 0, b = 0, a = 1) {
+    if (!points || points.length < 3) return;
+
+    for (let i = 1; i < points.length - 1; i++) {
+        fillTriangle(
+            ...points[0],
+            ...points[i],
+            ...points[i + 1],
+            r, g, b, a
+        );
+    }
+}
+
+function clipPolygonByRect(poly, rect) {
+    const xMin = Math.min(rect[0][0], rect[2][0]);
+    const xMax = Math.max(rect[0][0], rect[2][0]);
+    const yMin = Math.min(rect[0][1], rect[2][1]);
+    const yMax = Math.max(rect[0][1], rect[2][1]);
+
+    function clipAgainstEdge(points, inside, intersect) {
+        const result = [];
+        if (!points || points.length === 0) return result;
+
+        for (let i = 0; i < points.length; i++) {
+            const cur = points[i];
+            const prev = points[(i - 1 + points.length) % points.length];
+
+            const curIn = inside(cur);
+            const prevIn = inside(prev);
+
+            if (curIn) {
+                if (!prevIn) result.push(intersect(prev, cur));
+                result.push(cur);
+            } else if (prevIn) {
+                result.push(intersect(prev, cur));
+            }
+        }
+        return result;
+    }
+
+    function intersectWithX(p1, p2, x) {
+        const dx = p2[0] - p1[0];
+        if (dx === 0) return [x, p1[1]];
+        const t = (x - p1[0]) / dx;
+        return [x, p1[1] + t * (p2[1] - p1[1])];
+    }
+
+    function intersectWithY(p1, p2, y) {
+        const dy = p2[1] - p1[1];
+        if (dy === 0) return [p1[0], y];
+        const t = (y - p1[1]) / dy;
+        return [p1[0] + t * (p2[0] - p1[0]), y];
+    }
+
+    let out = poly;
+
+    out = clipAgainstEdge(out, p => p[0] >= xMin, (a, b) => intersectWithX(a, b, xMin));
+    out = clipAgainstEdge(out, p => p[0] <= xMax, (a, b) => intersectWithX(a, b, xMax));
+    out = clipAgainstEdge(out, p => p[1] >= yMin, (a, b) => intersectWithY(a, b, yMin));
+    out = clipAgainstEdge(out, p => p[1] <= yMax, (a, b) => intersectWithY(a, b, yMax));
+
+    return out;
+}
 
 
 function rand(min, max) {
