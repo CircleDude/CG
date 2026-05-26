@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Задание 6</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+
+    <script src="../JavaScript/libs/d3.v7.min.js"></script>
+    <script src="../JavaScript/libs/math.js"></script>
+    <script src="../JavaScript/canvasInterface.js"></script>
+    <script src="../JavaScript/functions.js"></script>
+    <script src="task_6.js"></script>
+</head>
+<body>
+
+    <div id="ui" style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:12px;">
+        <label>
+            Фигура:
+            <select id="shape">
+                <option value="cube">Куб</option>
+                <option value="octahedron">Октаэдр</option>
+                <option value="pyramid">Пирамида</option>
+                <option value="cylinder">Цилиндр</option>
+                <option value="cone">Конус</option>
+                <option value="sphere">Сфера</option>
+                <option value="torus">Тор</option>
+            </select>
+        </label>
+
+        <label>
+            Проекция:
+            <select id="projection">
+                <option value="orthographic">Ортографическая</option>
+                <option value="perspective">Перспективная</option>
+            </select>
+        </label>
+
+        <label id="focalWrap" style="display:none;">
+            Фокус:
+            <input id="focalLength" type="number" min="50" step="10" value="200" style="width:90px;">
+        </label>
+
+        <label>
+            <input type="checkbox" id="useZBuffer">
+            Z-buffer
+            <input id="zEps" type="number" step="0.01" value="0.05" style="width:90px;">
+        </label>
+
+        <div id="rotationControls" style="display:flex; gap:16px; align-items:center;">
+            <label style="display:flex; align-items:center; gap:4px;">
+                <input type="checkbox" id="rotX">
+                X
+                <input id="speedX" type="number" step="0.0005" value="0.0005" style="width:80px;">
+            </label>
+
+            <label style="display:flex; align-items:center; gap:4px;">
+                <input type="checkbox" id="rotY">
+                Y
+                <input id="speedY" type="number" step="0.0005" value="0.0005" style="width:80px;">
+            </label>
+
+            <label style="display:flex; align-items:center; gap:4px;">
+                <input type="checkbox" id="rotZ">
+                Z
+                <input id="speedZ" type="number" step="0.0005" value="0.0005" style="width:80px;">
+            </label>
+        </div>
+    </div>
+
+    <canvas id="myCanvas"></canvas>
+
+    <div style="margin-top:10px;">mouse:
+        <div id="x"></div>
+        <div id="y"></div>
+    </div>
+
+</body>
+</html>
